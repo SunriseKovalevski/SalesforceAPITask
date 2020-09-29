@@ -10,7 +10,7 @@
 
 
 global with sharing class SensorService {
-    webservice static SensorService(Id accountId, Id sensorid, List<Integer> line ) {
+    webservice static void addSensorService(Id accountId, Id sensorid, List<Integer> line ) {
         Sensor__c sensor = new Sensor__c();
         List<Sensor__c> qList = [SELECT Id, Name FROM Sensor__c WHERE Id =: sensorid];
         sensor = qList.get(0);
