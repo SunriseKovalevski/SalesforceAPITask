@@ -14,6 +14,27 @@ global with sharing class SensorService {
         Sensor__c sensor = new Sensor__c();
         List<Sensor__c> qList = [SELECT Id, Name FROM Sensor__c WHERE Id =: sensorid];
         sensor = qList.get(0);
-        
+        if (sensor == null) {
+            List<Integer> coord = new List<Integer>();
+            List<Sensor_Event__c> eventList = new List<Sensor_Event__c>();
+            for (Integer point : line) {
+                coord.add(point);
+                if (Math.mod(coord.size(), 3) == 0 ) {
+                    Sensor_Event__c sensorEvent = new Sensor_Event__c(
+                                                        Sensor__c = sensorid,
+                                                        x__c = coord.get(0),
+                                                        y__c = coord.get(1),
+                                                        z__c = coord.get(2));
+                    // record new sensor_event                
+                    eventList.add(sensorEvent);
+                    coord.clear();
+                }
+            }
+            insert eventList;
+            for (Integer i = 1; i < eventList.size(); i++) {
+                eventList.get(i).Previous_Event__c = eventList.get(i-1).Id;
+            }
+            update eventList;
+        }
     }
 }
