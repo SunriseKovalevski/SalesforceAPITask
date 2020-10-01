@@ -11,17 +11,24 @@
 
 global with sharing class SensorService {
     webservice static void addSensorService(Id accountId, Id sensorid, List<Integer> line ) {
+        System.debug(' '  + line);
         Sensor__c sensor = new Sensor__c();
         List<Sensor__c> qList = [SELECT Id, Name FROM Sensor__c WHERE Id =: sensorid];
-        sensor = qList.get(0);
-        if (sensor == null) {
+        if(qList.size() > 0) {
+ 			sensor = qList.get(0);
+ 		}
+        
+        if (qList.size() == 0) {
+        Sensor__c newSensor = new Sensor__c(Name = accountId, Account_Id__c = accountId);
+            System.debug(' ' + newSensor);
+        insert newSensor;
             List<Integer> coord = new List<Integer>();
             List<Sensor_Event__c> eventList = new List<Sensor_Event__c>();
             for (Integer point : line) {
                 coord.add(point);
                 if (Math.mod(coord.size(), 3) == 0 ) {
                     Sensor_Event__c sensorEvent = new Sensor_Event__c(
-                                                        Sensor__c = sensorid,
+                                                        Sensor__c = newSensor.id,
                                                         x__c = coord.get(0),
                                                         y__c = coord.get(1),
                                                         z__c = coord.get(2));
@@ -30,6 +37,7 @@ global with sharing class SensorService {
                     coord.clear();
                 }
             }
+            system.debug(' ' + eventList);
             insert eventList;
             for (Integer i = 1; i < eventList.size(); i++) {
                 eventList.get(i).Previous_Event__c = eventList.get(i-1).Id;
